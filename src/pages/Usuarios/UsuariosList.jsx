@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
 import { usuariosService } from '../../api/services';
 import { toast } from 'react-toastify';
+import { useAuthStore } from '../../store/authStore';
 import Card from '../../components/Common/Card';
 import Table from '../../components/Common/Table';
 import Modal from '../../components/Common/Modal';
 import Button from '../../components/Common/Button';
-import { FaUserShield } from 'react-icons/fa';
+import { FaUserShield, FaExclamationTriangle } from 'react-icons/fa';
 
 const UsuariosList = () => {
+  const { user } = useAuthStore();
   const [usuarios, setUsuarios] = useState([]);
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -39,13 +41,20 @@ const UsuariosList = () => {
   };
 
   const handleAssignRoles = async () => {
+    console.log('👤 Usuario:', rolesModal.usuario.username);
+    console.log('🎭 Roles seleccionados:', selectedRoles);
+    console.log('📤 Enviando roles:', JSON.stringify(selectedRoles));
+    
     try {
       await usuariosService.assignRoles(rolesModal.usuario.username, selectedRoles);
       toast.success('Roles asignados exitosamente');
       loadData();
       setRolesModal({ isOpen: false, usuario: null });
     } catch (error) {
-      toast.error('Error al asignar roles');
+      console.error('❌ Error completo:', error);
+      console.error('❌ Respuesta del servidor:', error.response?.data);
+      const mensaje = error.response?.data?.message || error.response?.data?.error || 'Error al asignar roles';
+      toast.error(mensaje);
     }
   };
 
@@ -111,6 +120,26 @@ const UsuariosList = () => {
         title="Gestión de Usuarios"
         subtitle="Administración de usuarios y roles del sistema (Solo Administradores)"
       >
+        {user && (
+          <div style={{
+            padding: '1rem',
+            marginBottom: '1rem',
+            background: '#e3f2fd',
+            border: '1px solid #2196f3',
+            borderRadius: '6px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}>
+            <FaExclamationTriangle style={{ color: '#1976d2' }} />
+            <div>
+              <strong>Usuario actual:</strong> {user.correo || user.username || 'Desconocido'}
+              <div style={{ fontSize: '0.85rem', color: '#1565c0', marginTop: '0.25rem' }}>
+                ⚠️ Para asignar roles, asegúrate de tener el rol de ADMIN
+              </div>
+            </div>
+          </div>
+        )}
         <Table columns={columns} data={usuarios} loading={loading} />
       </Card>
 

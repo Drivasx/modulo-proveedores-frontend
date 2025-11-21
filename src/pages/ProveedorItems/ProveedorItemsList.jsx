@@ -49,6 +49,15 @@ const ProveedorItemsList = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validar que se haya seleccionado un proveedor
+    if (!formData.idProveedor || formData.idProveedor === '') {
+      toast.error('Debe seleccionar un proveedor');
+      return;
+    }
+
+    console.log('📤 Enviando datos:', formData);
+    
     try {
       if (modal.item) {
         await proveedorItemsService.update(modal.item.id, formData);
@@ -60,7 +69,10 @@ const ProveedorItemsList = () => {
       loadData();
       closeModal();
     } catch (error) {
-      toast.error('Error al guardar el item');
+      console.error('❌ Error completo:', error);
+      console.error('❌ Respuesta del servidor:', error.response?.data);
+      const mensaje = error.response?.data?.message || error.response?.data?.error || 'Error al guardar el item';
+      toast.error(mensaje);
     }
   };
 
@@ -148,7 +160,10 @@ const ProveedorItemsList = () => {
             <label className="input-label">Proveedor *</label>
             <select
               value={formData.idProveedor}
-              onChange={(e) => setFormData({ ...formData, idProveedor: Number(e.target.value) })}
+              onChange={(e) => {
+                const value = e.target.value;
+                setFormData({ ...formData, idProveedor: value ? parseInt(value, 10) : '' });
+              }}
               required
               className="input"
             >
@@ -187,8 +202,12 @@ const ProveedorItemsList = () => {
             label="Precio de Venta"
             type="number"
             step="0.01"
+            min="0"
             value={formData.precioVenta}
-            onChange={(e) => setFormData({ ...formData, precioVenta: parseFloat(e.target.value) })}
+            onChange={(e) => {
+              const value = parseFloat(e.target.value);
+              setFormData({ ...formData, precioVenta: isNaN(value) ? 0 : value });
+            }}
             required
           />
           <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { reportesService, proveedoresService } from '../../api/services';
+import { reportesService, proveedoresService, comprasService } from '../../api/services';
 import { toast } from 'react-toastify';
 import Card from '../../components/Common/Card';
 import Button from '../../components/Common/Button';
@@ -11,6 +11,7 @@ const ReportesGenerar = () => {
   const [loading, setLoading] = useState(false);
   const [reporteGenerado, setReporteGenerado] = useState(null);
   const [proveedores, setProveedores] = useState([]);
+  const [estadosDisponibles, setEstadosDisponibles] = useState([]);
   const [filtros, setFiltros] = useState({
     estado: 'PENDIENTE',
     idProveedor: '',
@@ -20,6 +21,7 @@ const ReportesGenerar = () => {
 
   useEffect(() => {
     loadProveedores();
+    loadEstadosDisponibles();
   }, []);
 
   const loadProveedores = async () => {
@@ -31,9 +33,23 @@ const ReportesGenerar = () => {
     }
   };
 
+  const loadEstadosDisponibles = async () => {
+    try {
+      const compras = await comprasService.getAll();
+      const estados = [...new Set(compras.map(c => c.estado).filter(Boolean))];
+      setEstadosDisponibles(estados);
+      console.log('📊 Estados disponibles en compras:', estados);
+    } catch (error) {
+      console.error('Error loading estados', error);
+    }
+  };
+
   const generarReporte = async (tipo) => {
     setLoading(true);
     setReporteGenerado(null);
+
+    console.log('🔍 Generando reporte:', tipo);
+    console.log('📊 Filtros actuales:', filtros);
 
     try {
       let reporte;
@@ -53,7 +69,7 @@ const ReportesGenerar = () => {
             setLoading(false);
             return;
           }
-          reporte = await reportesService.ordenesPorProveedor(filtros.idProveedor);
+          reporte = await reportesService.ordenesPorProveedor(parseInt(filtros.idProveedor));
           break;
         case 'ordenes-por-mes':
           reporte = await reportesService.ordenesPorMes(filtros.mes, filtros.anio);
@@ -67,9 +83,15 @@ const ReportesGenerar = () => {
           return;
       }
 
+      console.log('✅ Reporte generado:', reporte);
+      console.log('📦 Contenido del reporte:', reporte?.contenido);
+      console.log('📝 Tipo de contenido:', typeof reporte?.contenido);
+      console.log('📏 Longitud (si es array):', Array.isArray(reporte?.contenido) ? reporte.contenido.length : 'no es array');
+
       setReporteGenerado(reporte);
       toast.success('Reporte generado exitosamente');
     } catch (error) {
+      console.error('❌ Error al generar reporte:', error);
       toast.error('Error al generar el reporte');
     } finally {
       setLoading(false);
@@ -130,11 +152,24 @@ const ReportesGenerar = () => {
                 onChange={(e) => setFiltros({ ...filtros, estado: e.target.value })}
                 className="input"
               >
-                <option value="BORRADOR">BORRADOR</option>
-                <option value="PENDIENTE">PENDIENTE</option>
-                <option value="APROBADA">APROBADA</option>
-                <option value="RECHAZADA">RECHAZADA</option>
+                {estadosDisponibles.length > 0 ? (
+                  estadosDisponibles.map(estado => (
+                    <option key={estado} value={estado}>{estado}</option>
+                  ))
+                ) : (
+                  <>
+                    <option value="BORRADOR">BORRADOR</option>
+                    <option value="PENDIENTE">PENDIENTE</option>
+                    <option value="APROBADA">APROBADA</option>
+                    <option value="RECHAZADA">RECHAZADA</option>
+                  </>
+                )}
               </select>
+              {estadosDisponibles.length > 0 && (
+                <small style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '0.25rem', display: 'block' }}>
+                  {estadosDisponibles.length} estado(s) con compras registradas
+                </small>
+              )}
             </div>
 
             <div>
@@ -176,25 +211,58 @@ const ReportesGenerar = () => {
         {reporteGenerado && (
           <Card title="Resultado del Reporte" className="mt-3">
             <div style={{ marginBottom: '1rem' }}>
+              <strong>ID:</strong> {reporteGenerado.id}
+            </div>
+            <div style={{ marginBottom: '1rem' }}>
               <strong>Tipo:</strong> {reporteGenerado.tipoReporte}
             </div>
             <div style={{ marginBottom: '1rem' }}>
-              <strong>Generado Por:</strong> {reporteGenerado.generadoPor}
+              <strong>Descripción:</strong> {reporteGenerado.descripcion || '-'}
             </div>
             <div>
               <strong>Contenido:</strong>
-              <pre
-                style={{
+              {reporteGenerado.contenido && Array.isArray(reporteGenerado.contenido) && reporteGenerado.contenido.length > 0 ? (
+                <>
+                  <div style={{ marginTop: '0.5rem', marginBottom: '0.5rem', color: 'var(--success)', fontWeight: '600' }}>
+                    ✅ {reporteGenerado.contenido.length} registro(s) encontrado(s)
+                  </div>
+                  <pre
+                    style={{
+                      marginTop: '1rem',
+                      padding: '1rem',
+                      background: 'var(--light-bg)',
+                      borderRadius: '6px',
+                      overflow: 'auto',
+                      maxHeight: '400px',
+                    }}
+                  >
+                    {JSON.stringify(reporteGenerado.contenido, null, 2)}
+                  </pre>
+                </>
+              ) : (
+                <div style={{
                   marginTop: '1rem',
-                  padding: '1rem',
-                  background: 'var(--light-bg)',
+                  padding: '2rem',
+                  background: '#fff3cd',
+                  border: '1px solid #ffc107',
                   borderRadius: '6px',
-                  overflow: 'auto',
-                  maxHeight: '400px',
-                }}
-              >
-                {JSON.stringify(reporteGenerado.contenidoReporte, null, 2)}
-              </pre>
+                  textAlign: 'center',
+                  color: '#856404'
+                }}>
+                  <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>📭</div>
+                  <div style={{ fontWeight: '600', marginBottom: '0.5rem' }}>No se encontraron registros</div>
+                  <div style={{ fontSize: '0.9rem' }}>
+                    {reporteGenerado.tipoReporte === 'ordenes-por-estado' && 
+                      `No hay órdenes con estado "${filtros.estado}"`}
+                    {reporteGenerado.tipoReporte === 'ordenes-por-proveedor' && 
+                      `No hay órdenes para el proveedor seleccionado`}
+                    {reporteGenerado.tipoReporte === 'ordenes-por-mes' && 
+                      `No hay órdenes en ${filtros.mes}/${filtros.anio}`}
+                    {!['ordenes-por-estado', 'ordenes-por-proveedor', 'ordenes-por-mes'].includes(reporteGenerado.tipoReporte) &&
+                      'Los datos para este reporte no están disponibles'}
+                  </div>
+                </div>
+              )}
             </div>
           </Card>
         )}

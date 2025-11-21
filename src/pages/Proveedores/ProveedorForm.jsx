@@ -24,7 +24,7 @@ const ProveedorForm = () => {
     contacto: '',
     saldoActual: 0,
     comprasMes: 0,
-    estadoProveedor: 'ACTIVO',
+    estadoProveedor: 'A',
   });
 
   useEffect(() => {
@@ -193,8 +193,8 @@ const ProveedorForm = () => {
                 required
                 className="input"
               >
-                <option value="ACTIVO">ACTIVO</option>
-                <option value="INACTIVO">INACTIVO</option>
+                <option value="A">ACTIVO</option>
+                <option value="I">INACTIVO</option>
               </select>
             </div>
           </div>

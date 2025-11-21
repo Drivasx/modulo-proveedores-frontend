@@ -13,7 +13,7 @@ const TiposProveedorList = () => {
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState({ isOpen: false, tipo: null });
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, tipo: null });
-  const [formData, setFormData] = useState({ descripcion: '', estado: 'ACTIVO' });
+  const [formData, setFormData] = useState({ descripcion: '', estado: 'A' });
 
   useEffect(() => {
     loadTipos();
@@ -42,7 +42,7 @@ const TiposProveedorList = () => {
       }
       loadTipos();
       setModal({ isOpen: false, tipo: null });
-      setFormData({ descripcion: '', estado: 'ACTIVO' });
+      setFormData({ descripcion: '', estado: 'A' });
     } catch (error) {
       toast.error('Error al guardar el tipo');
     }
@@ -60,7 +60,7 @@ const TiposProveedorList = () => {
   };
 
   const openModal = (tipo = null) => {
-    setFormData(tipo || { descripcion: '', estado: 'ACTIVO' });
+    setFormData(tipo || { descripcion: '', estado: 'A' });
     setModal({ isOpen: true, tipo });
   };
 
@@ -70,8 +70,8 @@ const TiposProveedorList = () => {
     {
       header: 'Estado',
       render: (row) => (
-        <span className={`badge ${row.estado === 'ACTIVO' ? 'badge-success' : 'badge-danger'}`}>
-          {row.estado}
+        <span className={`badge ${row.estado === 'A' ? 'badge-success' : 'badge-danger'}`}>
+          {row.estado === 'A' ? 'ACTIVO' : 'INACTIVO'}
         </span>
       ),
     },
@@ -123,8 +123,8 @@ const TiposProveedorList = () => {
               onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
               className="input"
             >
-              <option value="ACTIVO">ACTIVO</option>
-              <option value="INACTIVO">INACTIVO</option>
+              <option value="A">ACTIVO</option>
+              <option value="I">INACTIVO</option>
             </select>
           </div>
           <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>

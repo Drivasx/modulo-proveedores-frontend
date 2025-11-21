@@ -41,19 +41,9 @@ const ReportesList = () => {
   };
 
   const columns = [
+    { header: 'ID', accessor: 'id', width: '200px' },
     { header: 'Tipo', accessor: 'tipoReporte' },
-    {
-      header: 'Fecha Generación',
-      render: (row) => {
-        if (!row.fechaGeneracion) return '-';
-        try {
-          return format(new Date(row.fechaGeneracion), 'dd/MM/yyyy HH:mm');
-        } catch {
-          return 'Fecha inválida';
-        }
-      },
-    },
-    { header: 'Generado Por', accessor: 'generadoPor' },
+    { header: 'Descripción', accessor: 'descripcion' },
     {
       header: 'Acciones',
       width: '120px',
@@ -96,16 +86,16 @@ const ReportesList = () => {
         {viewModal.reporte && (
           <div>
             <div style={{ marginBottom: '1rem' }}>
-              <strong>Fecha de Generación:</strong>{' '}
-              {viewModal.reporte.fechaGeneracion 
-                ? format(new Date(viewModal.reporte.fechaGeneracion), 'dd/MM/yyyy HH:mm')
-                : '-'}
+              <strong>ID:</strong> {viewModal.reporte.id}
             </div>
             <div style={{ marginBottom: '1rem' }}>
-              <strong>Generado Por:</strong> {viewModal.reporte.generadoPor}
+              <strong>Tipo:</strong> {viewModal.reporte.tipoReporte}
+            </div>
+            <div style={{ marginBottom: '1rem' }}>
+              <strong>Descripción:</strong> {viewModal.reporte.descripcion || '-'}
             </div>
             <div>
-              <strong>Contenido:</strong>
+              <strong>Datos del Reporte:</strong>
               <pre style={{
                 marginTop: '1rem',
                 padding: '1rem',
@@ -114,7 +104,9 @@ const ReportesList = () => {
                 overflow: 'auto',
                 maxHeight: '400px'
               }}>
-                {JSON.stringify(viewModal.reporte.contenidoReporte, null, 2)}
+                {viewModal.reporte.contenido 
+                  ? JSON.stringify(viewModal.reporte.contenido, null, 2)
+                  : 'Sin datos disponibles'}
               </pre>
             </div>
           </div>

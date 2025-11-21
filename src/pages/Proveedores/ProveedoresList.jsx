@@ -65,10 +65,10 @@ const ProveedoresList = () => {
       render: (row) => (
         <span
           className={`badge ${
-            row.estadoProveedor === 'ACTIVO' ? 'badge-success' : 'badge-danger'
+            row.estadoProveedor === 'A' ? 'badge-success' : 'badge-danger'
           }`}
         >
-          {row.estadoProveedor}
+          {row.estadoProveedor === 'A' ? 'ACTIVO' : 'INACTIVO'}
         </span>
       ),
     },
