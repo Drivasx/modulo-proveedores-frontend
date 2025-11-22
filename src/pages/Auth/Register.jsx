@@ -10,9 +10,9 @@ const Register = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    username: '',
     nombre: '',
     correo: '',
+    telefono: '',
     clave: '',
     confirmPassword: '',
   });
@@ -28,17 +28,21 @@ const Register = () => {
 
   const validate = () => {
     const newErrors = {};
-    if (!formData.username) newErrors.username = 'El usuario es requerido';
     if (!formData.nombre) newErrors.nombre = 'El nombre es requerido';
     if (!formData.correo) {
       newErrors.correo = 'El correo es requerido';
     } else if (!/\S+@\S+\.\S+/.test(formData.correo)) {
       newErrors.correo = 'El correo no es válido';
     }
+    if (!formData.telefono) {
+      newErrors.telefono = 'El teléfono es requerido';
+    } else if (!/^[0-9]{7,20}$/.test(formData.telefono)) {
+      newErrors.telefono = 'El teléfono debe tener entre 7 y 20 dígitos';
+    }
     if (!formData.clave) {
       newErrors.clave = 'La contraseña es requerida';
-    } else if (formData.clave.length < 6) {
-      newErrors.clave = 'La contraseña debe tener al menos 6 caracteres';
+    } else if (formData.clave.length < 8) {
+      newErrors.clave = 'La contraseña debe tener al menos 8 caracteres';
     }
     if (formData.clave !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Las contraseñas no coinciden';
@@ -77,15 +81,6 @@ const Register = () => {
         </div>
         <form onSubmit={handleSubmit} className="auth-form">
           <Input
-            label="Usuario"
-            name="username"
-            value={formData.username}
-            onChange={handleChange}
-            error={errors.username}
-            placeholder="Ingrese un usuario"
-            required
-          />
-          <Input
             label="Nombre Completo"
             name="nombre"
             value={formData.nombre}
@@ -105,13 +100,24 @@ const Register = () => {
             required
           />
           <Input
+            label="Teléfono"
+            type="tel"
+            name="telefono"
+            value={formData.telefono}
+            onChange={handleChange}
+            error={errors.telefono}
+            placeholder="3001234567"
+            maxLength="20"
+            required
+          />
+          <Input
             label="Contraseña"
             type="password"
             name="clave"
             value={formData.clave}
             onChange={handleChange}
             error={errors.clave}
-            placeholder="Mínimo 6 caracteres"
+            placeholder="Mínimo 8 caracteres"
             required
           />
           <Input
