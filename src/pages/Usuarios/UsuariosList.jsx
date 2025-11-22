@@ -95,7 +95,7 @@ const UsuariosList = () => {
             row.estado === 'ACTIVO' ? 'badge-success' : 'badge-danger'
           }`}
         >
-          {row.estado || 'ACTIVO'}
+          {row.estado == 'A' ? 'ACTIVO' : 'INACTIVO'}
         </span>
       ),
     },

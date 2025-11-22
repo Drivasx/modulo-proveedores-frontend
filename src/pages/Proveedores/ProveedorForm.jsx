@@ -63,14 +63,31 @@ const ProveedorForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validar que se haya seleccionado un tipo de proveedor
+    if (!formData.idTipoProveedor) {
+      toast.error('Debe seleccionar un tipo de proveedor');
+      return;
+    }
+
     setLoading(true);
 
     try {
+      // Convertir los campos numéricos correctamente
+      const dataToSend = {
+        ...formData,
+        idTipoProveedor: Number(formData.idTipoProveedor),
+        saldoActual: formData.saldoActual ? Number(formData.saldoActual) : 0,
+        comprasMes: formData.comprasMes ? Number(formData.comprasMes) : 0,
+      };
+
+      console.log('Datos a enviar:', dataToSend);
+
       if (isEdit) {
-        await proveedoresService.update(id, formData);
+        await proveedoresService.update(id, dataToSend);
         toast.success('Proveedor actualizado exitosamente');
       } else {
-        await proveedoresService.create(formData);
+        await proveedoresService.create(dataToSend);
         toast.success('Proveedor creado exitosamente');
       }
       navigate('/proveedores');
@@ -111,8 +128,9 @@ const ProveedorForm = () => {
 
             <Input
               label="Documento"
-              type="number"
+              type="text"
               name="documento"
+              maxLength="20"
               value={formData.documento}
               onChange={handleChange}
               required

@@ -17,7 +17,7 @@ const CompraForm = () => {
   const [items, setItems] = useState([]);
   const [formData, setFormData] = useState({
     idProveedor: '',
-    fechaCompra: new Date().toISOString().split('T')[0],
+    fechaCompra: null, // Se asignará automáticamente en el backend
     valorBruto: 0,
     descuento: 0,
     impuesto: 0,
@@ -134,6 +134,11 @@ const CompraForm = () => {
         })),
       };
 
+      // Si no hay fecha (modo creación), eliminarla del objeto para que el backend asigne la actual
+      if (!dataToSend.fechaCompra) {
+        delete dataToSend.fechaCompra;
+      }
+
       if (isEdit) {
         await comprasService.update(id, dataToSend);
         toast.success('Compra actualizada exitosamente');
@@ -174,15 +179,6 @@ const CompraForm = () => {
                 ))}
               </select>
             </div>
-
-            <Input
-              label="Fecha de Compra"
-              type="date"
-              name="fechaCompra"
-              value={formData.fechaCompra}
-              onChange={handleChange}
-              required
-            />
 
             <Input
               label="Descuento"
